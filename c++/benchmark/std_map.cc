@@ -5,25 +5,31 @@
 #include <ctime>
 #include <chrono>
 #include <iostream>
+#include <vector>
 
 int main()
 {
+    using namespace std::chrono;
+    std::vector<int> keys;
+    duration<double> sum;
 
-    /* initialize random seed: */
     srand (time(NULL));
-    std::cout<<RAND_MAX<<std::endl;
     std::map<int, int> myMap;
-    // Inserting data in std::map
     while( myMap.size()<NUM){
       myMap.insert(std::make_pair(rand(), rand()));
-    }
+      keys.push_back(rand());
 
-    // Searching element in std::map by key.
-    auto start1 = std::chrono::steady_clock::now();
-    myMap.find(rand());
-    auto end1 = std::chrono::steady_clock::now();
-    std::chrono::duration<double> diff1 = end1-start1;
-    std::cout<<diff1.count()<<" "<<NUM<<std::endl;
+    }
+    int j=0; 
+    while (j<keys.size() ) {
+      auto start = high_resolution_clock::now();
+      myMap.find(keys[j]);
+      auto end = high_resolution_clock::now();
+      duration<double> diff = duration_cast<duration<double>>(end - start);
+      sum += diff;
+      j++;
+    }
+    std::cout<<sum.count()/keys.size()<<" "<<NUM<<std::endl;
 
     return 0;
 }

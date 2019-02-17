@@ -1,38 +1,49 @@
-//Main.cc
-
 #include <iostream>
 #include <utility>
 #include <string>
 #include <stdlib.h>
-#include <chrono> //--> per random
+#include <chrono>
+#include <vector>
 #include "../include/BST.h"
-
 int main(){
-
+  using namespace std::chrono;
+  duration<double> sum;
   srand (time(NULL));
-
+  std::vector<int> keys;
   BST<int, int> bst_int;
   int i = 0; bool add=false;
   while(i<NUM){
     add = bst_int.add(rand(), rand());
-    if(add) i++;
+    if(add) {
+      i++;
+      keys.push_back(rand());
+    }
   }
 
-  long int search_key = rand();
-
-  auto start1 = std::chrono::steady_clock::now();
-  bst_int.find(search_key);
-  auto end1 = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff1 = end1-start1;
-  std::cout<<"notb "<<diff1.count()<<" "<<NUM<<std::endl;
-
+  int j=0;
+  while (j<keys.size() ) {
+    auto start1 = high_resolution_clock::now();
+    bst_int.find(keys[j]);
+    auto end1 = high_resolution_clock::now();
+    duration<double> diff1 = duration_cast<duration<double>>(end1 - start1);
+    sum += diff1;
+    j++;
+  }
+  auto timen = sum/keys.size();
+  std::cout<<"notb "<<timen.count()<<" "<<NUM<<std::endl;
 
   bst_int.balance();
 
-  auto start = std::chrono::steady_clock::now();
-  bst_int.find(search_key);
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> diff = end-start;
-  std::cout<<"b "<<diff.count()<<" "<<NUM<<std::endl;
-
+  j=0;
+  duration<double> sum2;
+  while (j<keys.size() ) {
+    auto start = high_resolution_clock::now();
+    bst_int.find(keys[j]);
+    auto end = high_resolution_clock::now();
+    duration<double> diff = duration_cast<duration<double>>(end - start);
+    sum2 += diff;
+    j++;
+  }
+  auto timeb = sum2/keys.size();
+  std::cout<<"b "<<timeb.count()<<" "<<NUM<<std::endl;
 }
