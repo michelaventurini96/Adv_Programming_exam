@@ -4,11 +4,14 @@
  * @author Michela Venturini and Alessia Paoletti
  */
 
+#ifndef _BST_H
+#define _BST_H
 #include <iostream>
 #include <memory>
 #include<vector>
-//#include <string> <--- tree to string
 #include<functional>
+//#include <string> <--- tree to string
+
 /**
  * @brief Class that implements a Binary Search Tree
  *
@@ -94,7 +97,7 @@ public:
 	 *@param current_key: the key that has to be search
 	 *@return the value corresponding to the key if it exists
 	 */
-	const V& operator[](const K& current_key) const;
+	const V& operator[](const K& current_key) const noexcept;
 
   /**
 	*@brief Overloading the operator<<
@@ -128,7 +131,7 @@ private:
 	 *@param key: the const key of the pair
 	 *@param val: the value of the pair
 	 */
-	bool insert(Node* current_node, const K key, const V val);
+	bool add(Node* current_node, const K& key, const V& val);
 
 	/**
 	 *@brief Control if the tree is balanced.
@@ -195,7 +198,7 @@ private:
 	*
 	*@param current_node the node that has to be copied
  */
-	void copy( const Node& current_node);
+	void copy(const Node& current_node);
 
 	/**
 		*@brief Auxiliar function for the FindFunction
@@ -214,7 +217,7 @@ private:
 		*@return an Iterator to the corresponding node if the key is found,
 		*an Iterator to end() otherwise
 	 */
-	Iterator findHelper(const K key, Node* current_node) const;
+	Iterator findHelper(const K& key, Node* current_node) const noexcept;
 
 public:
 	/**
@@ -227,7 +230,7 @@ public:
 	*@return an Iterator to the corresponding node if the key is found,
 	*an Iterator to end() otherwise
 	*/
-	Iterator find(const K key) const noexcept;
+	Iterator find(const K& key) const noexcept;
 
 	/**
 	* @brief Return an Iterator to the first node
@@ -268,7 +271,7 @@ public:
 	}
 
 	/**
-	* @brief Add a node in the tree
+	* @brief insert a node in the tree
 	*
 	* If the tree is empty, the node becomes the root of the tree.
 	* If in the tree some nodes are already present, the node is inserted according
@@ -277,7 +280,7 @@ public:
 	*@param key: is the const key of the pair of the node
 	*@param val: is the val of the pair of the node
 	 */
-	bool add(const K key, const V val);
+	bool insert(const K& key, const V& val);
 
 	/**
 	* @brief Clean the tree
@@ -358,10 +361,11 @@ struct BST<K,V,C>::Node {
 template <typename K, typename V, typename C>
 class BST<K,V,C>::Iterator : public std::iterator<std::forward_iterator_tag,std::pair<const K, V>>{
 
-	public:
+	private:
 		/** pointer to one Node*/
 		BST<K,V,C>::Node* current{};
 
+	public:
 		/**constructor for a new Iterator object */
 		Iterator(BST<K,V,C>::Node* n): current{n} {}
 
@@ -387,7 +391,7 @@ class BST<K,V,C>::Iterator : public std::iterator<std::forward_iterator_tag,std:
 
 		/** Overloading of the operator *  */
 		std::pair<const K,V>& operator*() const {
-			if (current == nullptr) throw std::logic_error("Invalid iterator dereference!");
+			//if (current == nullptr) throw std::logic_error("Invalid iterator dereference!");
 			return current->pair;
 		}
 
@@ -409,6 +413,7 @@ class BST<K,V,C>::ConstIterator: public BST<K,V,C>::Iterator{
 
 	public:
 		using BST<K,V,C>::Iterator::Iterator;
+
 		/** Overloading of the operator *  */
 		const std::pair<const K,V>& operator*() const {
 			return BST<K,V,C>::Iterator::operator*();
@@ -434,41 +439,42 @@ template<typename K, typename V,typename C>
 V& BST<K,V,C>::operator[](const K& current_key){
 	auto find_value = find(current_key);
 	if (find_value!=end()) return find_value->second;
-	else add(current_key, V{});
+	else insert(current_key, V{});
 	auto find_value2 = find(current_key);
 	return find_value2->second;
 	}
 
 template<typename K, typename V,typename C>
-const V& BST<K,V,C>::operator[](const K& current_key) const{
-	ConstIterator find_value = find(current_key);
+const V& BST<K,V,C>::operator[](const K& current_key) const noexcept{
+	auto find_value = find(current_key);
 	if (find_value!=end()) return find_value->second;
+	else return V{};
 	//is a constant method, if it does not find the key it throws an exception
-	throw std::runtime_error("This key does not exist in the tree");
-}// ---> perché?
+	//throw std::runtime_error("This key does not exist in the tree"); --------> toglierei l'eccezione
+}
 
 template<typename K, typename V, typename C>
-bool BST<K,V,C>::insert(Node* current_node, const K key,  const V val) {
+bool BST<K,V,C>::add(Node* current_node, const K& key, const V& val) {
   if (compare(current_node->pair.first, key)){
     if (!current_node->left) {
       current_node->left.reset(new Node(key, val, current_node));
     } else {
-      insert(current_node->left.get(), key, val);
+      add(current_node->left.get(), key, val);
     }
 	} else if (compare(key, current_node->pair.first)){
     if (!current_node->right) {
         current_node->right.reset(new Node(key, val, current_node->parent));
     } else {
-      insert(current_node->right.get(), key, val);
+      add(current_node->right.get(), key, val);
     }
   } else return false;
 return true;
 }
 
 template<typename K, typename V, typename C>
-bool BST<K,V,C>::add(const K key,const V val){
+bool BST<K,V,C>::insert(const K& key,const V& val){
   if (root){
-    return insert(root.get(), key, val);
+    return add(root.get(), key, val);
   } else {
     root.reset(new Node(key, val, nullptr));
 		return true;
@@ -505,7 +511,7 @@ template<typename K, typename V, typename C>
 void BST<K,V,C>::balanceHelper(std::vector<std::pair<K,V>>& vector_nodes, int start,int end){
   if (!(start>end)){
     int  mid = (start+end)/2;
-    this->add(vector_nodes[mid].first, vector_nodes[mid].second );
+    this->insert(vector_nodes[mid].first, vector_nodes[mid].second );
     balanceHelper(vector_nodes,start,mid-1); //create left subtree
     balanceHelper(vector_nodes,mid+1,end); //create right subtree
   }
@@ -525,23 +531,22 @@ void BST<K,V,C>::balance(){
 }
 
 template<typename K, typename V, typename C>
-typename BST<K,V,C>::Iterator BST<K,V,C>::find(const K key) const noexcept {
+typename BST<K,V,C>::Iterator BST<K,V,C>::find(const K& key) const noexcept {
 		if(!root) return Iterator{end()};
 		return findHelper(key, root.get());
 }
 
 template <typename K, typename V, typename C>
-typename BST<K,V,C>::Iterator BST<K,V,C>::findHelper(const K key, Node* current_node) const {
-	//std::cout<<"key="<<key<<" current_node="<<current_node->pair.first<<std::endl;
+typename BST<K,V,C>::Iterator BST<K,V,C>::findHelper(const K& key, Node* current_node) const noexcept {
 	if (compare(key, current_node->pair.first)) {
 		//if the key to find is greater than the key of the current_node,
 		//search it in the subtree with root the right child of the current_node (if exists)
-		if (current_node -> right) return BST<K,V,C>::findHelper(key, current_node -> right.get());
+		if (current_node -> right) return findHelper(key, current_node -> right.get());
 	}
 	else if (compare(current_node -> pair.first, key) ) {
 		//if the key to find is lower than the key of the current_node,
 		//search it in the subtree with root the left child of the current_node (if exists)
-		if(current_node->left) return BST<K,V,C>::findHelper(key, current_node -> left.get());
+		if(current_node->left) return findHelper(key, current_node -> left.get());
 	}
 	else if (key == current_node -> pair.first) return Iterator{current_node};
 	return Iterator{end()};
@@ -549,14 +554,14 @@ typename BST<K,V,C>::Iterator BST<K,V,C>::findHelper(const K key, Node* current_
 
 template <typename K, typename V, typename C>
 void BST<K,V,C>::copy( const Node& current_node){
-				add(current_node.pair.first, current_node.pair.second);
+				insert(current_node.pair.first, current_node.pair.second);
 				if (current_node.left) copy(*current_node.left);
 				if (current_node.right) copy(*current_node.right);
 }
 
 template <typename K, typename V, typename C>
 typename BST<K,V,C>::Iterator& BST<K,V,C>::Iterator::operator++() {
-	if (!current) throw std::out_of_range ("Out-of-bounds iterator increment!");
+	//if (!current) throw std::out_of_range ("Out-of-bounds iterator increment!"); //---------------------- commentiamo o teniamo?
   if ( (!current->right && !current->left) || !current->right ){ 	//if the node has no children or only the left one
     current = current->parent; //the successor is the parent
   }
@@ -595,3 +600,4 @@ typename BST<K,V,C>::Iterator& BST<K,V,C>::Iterator::operator++() {
 //     }
 //
 // }
+#endif 

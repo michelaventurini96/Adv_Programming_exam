@@ -4,18 +4,22 @@ int main() {
   //create a new bst
   BST<int,int> bst_int;
   //add elements
-  bst_int.add(5,5);
-  bst_int.add(3,9);
-  bst_int.add(8,6);
-  bst_int.add(7,12);
-  bst_int.add(12,5);
+  bst_int.insert(5,5);
+  bst_int.insert(3,9);
+  bst_int.insert(8,6);
+  bst_int.insert(7,12);
+  bst_int.insert(12,5);
   //try to add an existing key
-  bst_int.add(12,5);
+  bst_int.insert(12,5);
   //print the bst
   std::cout<< bst_int << std::endl;
   //balance the tree
   bst_int.balance();
   //iterate through the tree with Iterator
+  for(auto it=bst_int.begin(); it != bst_int.end(); it++){
+    std::cout<<"Key: "<<it->first<<",  Value: "<<it->second<<std::endl;
+  }
+
   for(auto it=bst_int.begin(); it != bst_int.end(); it++){
     std::cout<<"Key: "<<it->first<<",  Value: "<<it->second<<std::endl;
   }
@@ -36,7 +40,7 @@ int main() {
   //copy assignment
   bst_int_copy = bst_int;
   std::cout << "Print the copied tree\n" << bst_int_copy << std::endl;
-  bst_int.add(120,30);
+  bst_int.insert(120,30);
   //after adding an element to the first tree the second does not change
   std::cout << "Print the tree" << bst_int << std::endl;
   std::cout << "Print the copied tree" << bst_int_copy << std::endl;
@@ -44,7 +48,7 @@ int main() {
   //copy constructor
   BST<int,int> bst_int_copy_constr = bst_int;
   std::cout << "Print the tree constructed usign copy construct" << bst_int_copy_constr << std::endl;
-  bst_int.add(130,20);
+  bst_int.insert(130,20);
   //after adding an element to the first tree the second does not change
   std::cout << "Print the bst" << bst_int << std::endl;
   std::cout << "Print the constructed tree" << bst_int_copy_constr << std::endl;
@@ -63,24 +67,24 @@ int main() {
   bst_int.clear();
 
   BST<int,int> bst_prova;
-  bst_prova.add(1,2);
-  bst_prova.add(3,4);
+  bst_prova.insert(1,2);
+  bst_prova.insert(3,4);
   auto init = bst_prova.begin();
 
   std::cout << "init -> " <<(++init)->first <<std::endl;
   std::cout << "init -> " <<(init++)->first <<std::endl;
-  try{
-    init++;
-  }catch(std::out_of_range e){
-    std::cout<<"An exception occurred: "<<e.what()<<std::endl;
-  }
+  // try{
+  //   init++;
+  // }catch(std::out_of_range e){
+  //   std::cout<<"An exception occurred: "<<e.what()<<std::endl;
+  // }
 
 //---------------------------------BST STRING VALUE---------------------//
   BST<int,std::string> bst_string;
-  bst_string.add(3,"hello");
-  bst_string.add(4,"everyone");
-  bst_string.add(9, "monday");
-  bst_string.add(11, "day");
+  bst_string.insert(3,"hello");
+  bst_string.insert(4,"everyone");
+  bst_string.insert(9, "monday");
+  bst_string.insert(11, "day");
   std::cout <<std::endl;
 
   std::cout << "Print the tree " << bst_string<<std::endl;
@@ -107,10 +111,10 @@ int main() {
 
 
   BST<std::string,std::string> bst_string1;
-  bst_string1.add("hi","hello");
-  bst_string1.add("everybody","everyone");
-  bst_string1.add("sunday", "monday");
-  bst_string1.add("night", "day");
+  bst_string1.insert("hi","hello");
+  bst_string1.insert("everybody","everyone");
+  bst_string1.insert("sunday", "monday");
+  bst_string1.insert("night", "day");
 
   std::cout << "Print the tree " << bst_string1<<std::endl;
   bst_string1.balance();
